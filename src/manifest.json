@@ -1,0 +1,23 @@
+{
+  "name": "hider",
+  "description": "chrome history cleaner",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "permissions": ["alarms", "tabs", "history", "storage"],
+  "icons": {
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "browser_action": {
+    "default_title": "hider",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  }
+}
