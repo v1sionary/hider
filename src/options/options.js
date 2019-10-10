@@ -31,15 +31,15 @@ const router = new VueRouter({
   routes,
 });
 
-const _store = new Store();
-Vue.prototype.$store = _store;
+const bp = browser.extension.getBackgroundPage();
+console.log(bp.$store);
 
-// get storage data
-_store.getStoreRules().then(() => {
-  /* eslint-disable no-new */
-  new Vue({
-    el: '#app',
-    router,
-    render: h => h(App),
-  });
+const _store = new Store();
+Vue.prototype.$store = bp.$store;
+
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  router,
+  render: h => h(App),
 });

@@ -1,6 +1,7 @@
-import { removeByKeywordInRange } from './libs/sweeper';
-
 const browser = (global.browser = require('webextension-polyfill'));
+
+import Store from './libs/store';
+import Rule from './libs/Rule';
 
 // todo
 // find & remove history which are match the rules
@@ -10,8 +11,26 @@ const browser = (global.browser = require('webextension-polyfill'));
 // find & remove history which are match the rules
 // on the regular time
 
-removeByKeywordInRange('google', new Date('2019-10-7 0:00:00').getTime(), '2019-10-7 23:00:00').then(count => {
-  console.log(`removed ${count} visited items`);
-});
+const store = new Store();
+window.$store = store;
 
-browser.windows.onCreated.addListener(() => {});
+let tabsCount = 0;
+
+store.getStoreRules().then(() => {
+  browser.windows.onRemoved.addListener(() => {});
+
+  browser.tabs.getAllInWindow(null, tabs => {
+    tabsCount = tabs.length;
+  });
+
+  browser.tabs.onCreated.addListener(() => {
+    tabsCount += 1;
+  });
+
+  browser.tabs.onRemoved.addListener(() => {
+    tabsCount -= 1;
+    if (tabsCount === 0) {
+      // do sweep on last tab closed
+    }
+  });
+});
