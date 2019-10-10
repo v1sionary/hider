@@ -11,7 +11,6 @@
 import Vue from 'vue';
 import { Row, Col } from 'element-ui';
 import RuleBoard from '../components/RuleBoard';
-import { getRules } from '../../libs/store';
 
 Vue.use(Row);
 Vue.use(Col);
@@ -25,7 +24,7 @@ export default {
     };
   },
   created() {
-    getRules().then(rules => {
+    this.$store.getRules().then(rules => {
       this.rules = rules;
     });
   },

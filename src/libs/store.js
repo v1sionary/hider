@@ -1,40 +1,53 @@
+import Rule from '../libs/Rule';
 const browser = require('webextension-polyfill');
 
 const STORE_KEY = 'HIDER_RULES';
 
-let rulesMap;
+let singleton;
 
-export function saveRule(rule, overwrite) {
-  if (rulesMap[rule.id] && !overwrite) return Promise.reject('already existed!');
+export default class Store {
+  constructor() {
+    if (!singleton) singleton = this;
+    return singleton || this;
+  }
 
-  rulesMap[rule.id] = rule;
-  return browser.storage.local.set({ [STORE_KEY]: rulesMap }).then(() => {
-    console.log('rule saved');
-  });
-}
-
-export function getRuleByID(id) {
-  return Promise.resolve(rulesMap[id]);
-}
-
-export function getRules() {
-  if (rulesMap) {
-    console.log('find rules');
-    return Promise.resolve(Object.values(rulesMap));
-  } else {
-    return getStoreRules().then(rulesMap => {
-      return Object.values(rulesMap);
+  getStoreRules() {
+    return browser.storage.local.get(STORE_KEY).then(res => {
+      this.rulesMap = { ...res[STORE_KEY] };
+      return { ...res[STORE_KEY] };
     });
   }
-}
 
-export function clearStoreRules() {
-  return browser.storage.local.clear();
-}
+  getRules() {
+    return Promise.resolve(Object.values(this.rulesMap));
+  }
 
-function getStoreRules() {
-  return browser.storage.local.get(STORE_KEY).then(res => {
-    rulesMap = { ...res[STORE_KEY] };
-    return rulesMap;
-  });
+  getRuleByID(id) {
+    return Promise.resolve(new Rule(this.rulesMap[id]));
+  }
+
+  saveRule(rule, overwrite) {
+    if (this.rulesMap[rule.id] && !overwrite) return Promise.reject('already existed!');
+
+    this.rulesMap[rule.id] = rule.getProperties();
+    return browser.storage.local.set({ [STORE_KEY]: this.rulesMap }).then(() => {
+      // isSuccess = true
+      return true;
+    });
+  }
+
+  removeByID(id) {
+    if (!this.rulesMap[id]) return Promise.reject('no such rule');
+
+    delete this.rulesMap[id];
+    return browser.storage.local.set({ [STORE_KEY]: this.rulesMap }).then(() => {
+      // isSuccess = true
+      return true;
+    });
+  }
+
+  clearStoreRules() {
+    this.rulesMap = {};
+    return browser.storage.local.clear();
+  }
 }

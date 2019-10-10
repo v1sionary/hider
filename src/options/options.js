@@ -5,6 +5,8 @@ import App from './App';
 
 import './common.css';
 
+import Store from '../libs/store';
+
 // page
 import OptionsMain from './pages/OptionsMain';
 import OptionsEdit from './pages/OptionsEdit';
@@ -29,9 +31,15 @@ const router = new VueRouter({
   routes,
 });
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  render: h => h(App),
+const _store = new Store();
+Vue.prototype.$store = _store;
+
+// get storage data
+_store.getStoreRules().then(() => {
+  /* eslint-disable no-new */
+  new Vue({
+    el: '#app',
+    router,
+    render: h => h(App),
+  });
 });

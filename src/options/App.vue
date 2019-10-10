@@ -22,8 +22,9 @@
 
 <script>
 import Vue from 'vue';
-import { Container, Header, Main, Button, MessageBox } from 'element-ui';
+import { Container, Header, Main, Button, MessageBox, Message } from 'element-ui';
 Vue.prototype.$confirm = MessageBox.confirm;
+Vue.prototype.$message = Message;
 
 Vue.use(Container);
 Vue.use(Header);
