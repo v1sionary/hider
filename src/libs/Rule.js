@@ -1,10 +1,11 @@
 // rules: match & execute & schedule
 let rule_id = 1;
-const RULE_PROPERTIES = ['id', 'enabled', 'url', 'keyword'];
+const RULE_PROPERTIES = ['id', 'enabled', 'url', 'keyword', 'searchArea'];
 const RULE_PROPERTIES_DEFAULT = {
   enabled: false,
   url: '',
   keyword: '',
+  searchArea: 'ALL',
 };
 
 export default class Rule {

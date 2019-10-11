@@ -5,8 +5,6 @@ import App from './App';
 
 import './common.css';
 
-import Store from '../libs/store';
-
 // page
 import OptionsMain from './pages/OptionsMain';
 import OptionsEdit from './pages/OptionsEdit';
@@ -32,9 +30,6 @@ const router = new VueRouter({
 });
 
 const bp = browser.extension.getBackgroundPage();
-console.log(bp.$store);
-
-const _store = new Store();
 Vue.prototype.$store = bp.$store;
 
 /* eslint-disable no-new */

@@ -7,7 +7,11 @@ let singleton;
 
 export default class Store {
   constructor() {
-    if (!singleton) singleton = this;
+    if (!singleton) {
+      this.getStoreRules();
+      singleton = this;
+    }
+
     return singleton || this;
   }
 
@@ -20,6 +24,11 @@ export default class Store {
 
   getRules() {
     return Promise.resolve(Object.values(this.rulesMap));
+  }
+
+  getEnabledRules() {
+    const _enabledRules = Object.values(this.rulesMap).filter(rule => rule.enabled === true);
+    return Promise.resolve(_enabledRules);
   }
 
   getRuleByID(id) {

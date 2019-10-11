@@ -1,7 +1,15 @@
 <template>
   <el-row>
     <el-col class="rule-container" :span="24" v-if="rules.length === 0">暂无数据</el-col>
-    <el-col :md="12" :lg="8" class="rule-container" v-for="rule in rules" :key="rule.id">
+    <el-col
+      :xs="12"
+      :sm="12"
+      :md="12"
+      :lg="8"
+      class="rule-container"
+      v-for="rule in rules"
+      :key="rule.id"
+    >
       <rule-board :rule="rule"></rule-board>
     </el-col>
   </el-row>

@@ -1,5 +1,5 @@
 <template>
-  <el-tooltip :content="status ? '启用' : '停用'" placement="right">
+  <el-tooltip :content="status ? '启用中' : '停用中'" placement="right">
     <span class="status" :class="{'enabled': status}"></span>
   </el-tooltip>
 </template>

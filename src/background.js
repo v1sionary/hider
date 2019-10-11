@@ -1,11 +1,7 @@
 const browser = (global.browser = require('webextension-polyfill'));
 
 import Store from './libs/store';
-import Rule from './libs/Rule';
-
-// todo
-// find & remove history which are match the rules
-// when open & close the browser
+import { removeByKeyword } from './libs/sweeper';
 
 // todo
 // find & remove history which are match the rules
@@ -14,23 +10,14 @@ import Rule from './libs/Rule';
 const store = new Store();
 window.$store = store;
 
-let tabsCount = 0;
-
-store.getStoreRules().then(() => {
-  browser.windows.onRemoved.addListener(() => {});
-
-  browser.tabs.getAllInWindow(null, tabs => {
-    tabsCount = tabs.length;
-  });
-
-  browser.tabs.onCreated.addListener(() => {
-    tabsCount += 1;
-  });
-
-  browser.tabs.onRemoved.addListener(() => {
-    tabsCount -= 1;
-    if (tabsCount === 0) {
-      // do sweep on last tab closed
-    }
-  });
+browser.windows.onCreated.addListener(() => {
+  // find & remove history which are match the keyword
+  // when open a browser
+  setTimeout(() => {
+    store.getEnabledRules().then(rules => {
+      rules.forEach(rule => {
+        removeByKeyword(rule.keyword, rule.searchArea);
+      });
+    });
+  }, 1000);
 });

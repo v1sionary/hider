@@ -64,7 +64,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          if (isRuleEnabled) return removeByKeyword(rule.keyword);
+          if (isRuleEnabled) return removeByKeyword(rule.keyword, rule.searchArea);
           return this.switchStatus(rule);
         })
         .then(res => {
@@ -72,13 +72,13 @@ export default {
 
           // isSuccess from switchStatus
           if (res === true) {
-            return removeByKeyword(rule.keyword);
+            return removeByKeyword(rule.keyword, rule.searchArea);
           }
 
-          return;
+          return false;
         })
         .then(removeCount => {
-          if (!removeCount) return;
+          if (removeCount === false) return;
           this.$message({
             showClose: true,
             message: `成功清除，清除条数：${removeCount}`,
@@ -87,7 +87,8 @@ export default {
         });
     },
     switchStatus(rule) {
-      return this.$store.saveRule(Object.assign({}, rule, { enabled: !rule.enabled }), true).then(isSuccess => {
+      const _data = new Rule(Object.assign({}, rule, { enabled: !rule.enabled }));
+      return this.$store.saveRule(_data, true).then(isSuccess => {
         if (isSuccess === true) {
           rule.enabled = !rule.enabled;
         } else {

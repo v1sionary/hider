@@ -8,10 +8,15 @@
       <i class="el-icon-edit"></i>
     </el-divider>
     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="rule-form">
-      <el-form-item label="关键字" prop="keyword">
+      <el-form-item label="关键字" prop="keyword" size="small">
         <el-input v-model="ruleForm.keyword"></el-input>
       </el-form-item>
-      <el-form-item label="启用" prop="enabled">
+      <el-form-item label="检索范围" prop="searchArea" size="small">
+        <el-radio v-model="ruleForm.searchArea" label="ALL">URL和标题</el-radio>
+        <el-radio v-model="ruleForm.searchArea" label="URL">URL</el-radio>
+        <el-radio v-model="ruleForm.searchArea" label="TITLE">标题</el-radio>
+      </el-form-item>
+      <el-form-item label="启用" prop="enabled" size="small">
         <el-switch v-model="ruleForm.enabled"></el-switch>
       </el-form-item>
       <el-button plain size="small" @click="save">保存</el-button>
@@ -20,7 +25,7 @@
         size="small"
         type="danger"
         @click.prevent="removeRule(ruleForm.id)"
-        v-if="ruleForm.id"
+        v-if="pid"
       >删除</el-button>
     </el-form>
   </div>
@@ -28,7 +33,7 @@
 
 <script>
 import Vue from 'vue';
-import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Button, Switch } from 'element-ui';
+import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Radio, Button, Switch } from 'element-ui';
 
 import Rule from '../../libs/Rule';
 
@@ -39,6 +44,7 @@ Vue.use(Divider);
 Vue.use(Form);
 Vue.use(FormItem);
 Vue.use(Input);
+Vue.use(Radio);
 Vue.use(Button);
 Vue.use(Switch);
 
@@ -51,15 +57,18 @@ export default {
       },
       rules: {
         keyword: [{ required: true, message: '请输入关键字', trigger: 'blur' }],
+        searchArea: [{ required: true, message: '请选择检索范围', trigger: 'blur' }],
       },
     };
   },
   created() {
-    const id = this.$route.params.ID;
-    if (id) {
-      this.$store.getRuleByID(id).then(rule => {
+    this.pid = this.$route.params.ID;
+    if (this.pid) {
+      this.$store.getRuleByID(this.pid).then(rule => {
         this.ruleForm = rule;
       });
+    } else {
+      this.ruleForm = new Rule();
     }
   },
   methods: {
@@ -67,7 +76,7 @@ export default {
       this.$refs.ruleForm.validate(valid => {
         if (valid) {
           // 本地存储
-          this.$store.saveRule(new Rule(this.ruleForm), !!this.ruleForm.id).then(() => {
+          this.$store.saveRule(this.ruleForm, !!this.pid).then(() => {
             this.$message({
               showClose: true,
               message: '保存成功',
@@ -118,5 +127,8 @@ export default {
 .container {
   background: #ffffff;
   padding: 15px 9px;
+}
+.rule-form {
+  width: 680px;
 }
 </style>
