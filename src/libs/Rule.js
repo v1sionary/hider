@@ -32,4 +32,21 @@ export default class Rule {
         return res;
       }, Object.create(null));
   }
+
+  getExcutedRule() {
+    if (this.url)
+      return {
+        type: 'url',
+        url: this.url,
+      };
+
+    if (this.keyword)
+      return {
+        type: 'keyword',
+        keyword: this.keyword,
+        searchArea: this.searchArea,
+      };
+
+    return {};
+  }
 }

@@ -3,6 +3,8 @@ import VueRouter from 'vue-router';
 import 'normalize.css';
 import App from './App';
 
+import { Button } from 'element-ui';
+
 import './common.css';
 
 // page
@@ -12,6 +14,7 @@ import OptionsEdit from './pages/OptionsEdit';
 global.browser = require('webextension-polyfill');
 
 Vue.use(VueRouter);
+Vue.use(Button);
 
 const routes = [
   {
@@ -29,12 +32,15 @@ const router = new VueRouter({
   routes,
 });
 
-const bp = browser.extension.getBackgroundPage();
-Vue.prototype.$store = bp.$store;
+browser.runtime.getBackgroundPage().then(bg => {
+  setTimeout(() => {
+    Vue.prototype.$store = bg.$store;
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  render: h => h(App),
+    /* eslint-disable no-new */
+    new Vue({
+      el: '#app',
+      router,
+      render: h => h(App),
+    });
+  }, 100);
 });

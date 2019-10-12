@@ -1,12 +1,18 @@
 import Vue from 'vue';
 import App from './App';
+import 'normalize.css';
 
-global.browser = require('webextension-polyfill');
-Vue.prototype.$browser = global.browser;
+const browser = require('webextension-polyfill');
+Vue.prototype.$browser = browser;
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
+browser.runtime.getBackgroundPage().then(bg => {
+  setTimeout(() => {
+    Vue.prototype.$store = bg.$store;
 
-  render: h => h(App),
+    /* eslint-disable no-new */
+    new Vue({
+      el: '#app',
+      render: h => h(App),
+    });
+  }, 100);
 });

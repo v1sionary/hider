@@ -6,39 +6,48 @@
         {{item.keyword || item.url}}
       </h2>
     </div>
-    <el-button
-      type="primary"
-      icon="el-icon-magic-stick"
-      size="mini"
-      @click.prevent="sweep(item)"
-    >执行清除</el-button>
-    <router-link
-      :to="{name: 'edit', params: {ID: item.id}}"
-      style="display:inline-block;margin: 0 10px;"
-    >
-      <el-button type="text" icon="el-icon-edit" size="mini">编辑</el-button>
-    </router-link>
-    <el-button
-      type="text"
-      icon="el-icon-switch-button"
-      size="mini"
-      :class="{'disable-btn' : item.enabled}"
-      @click.prevent="switchStatus(item)"
-    >{{item.enabled ? '停用' : '启用'}}</el-button>
+    <div class="ctrl-bar">
+      <el-button
+        type="primary"
+        icon="el-icon-magic-stick"
+        size="mini"
+        @click.prevent="sweep(item)"
+      >执行清除</el-button>
+      <router-link
+        :to="{name: 'edit', params: {ID: item.id}}"
+        style="display:inline-block;margin: 0 10px;"
+      >
+        <el-button type="text" icon="el-icon-edit" size="mini">编辑</el-button>
+      </router-link>
+      <el-button
+        type="text"
+        icon="el-icon-switch-button"
+        size="mini"
+        :class="{'disable-btn' : item.enabled}"
+        @click.prevent="switchStatus(item)"
+      >{{item.enabled ? '停用' : '启用'}}</el-button>
+
+      <el-button
+        type="text"
+        icon="el-icon-delete"
+        size="mini"
+        class="delete-btn"
+        @click.prevent="deleteRule(item.id)"
+      >删除</el-button>
+    </div>
   </el-card>
 </template>
 
 <script>
 import Vue from 'vue';
-import { Card, Button, Tooltip } from 'element-ui';
+import { Card, Tooltip } from 'element-ui';
 
 import Rule from '../../libs/Rule';
-import { removeByKeyword } from '../../libs/sweeper';
+import { sweepByRule } from '../../libs/sweeper';
 
 import RuleStatus from './RuleStatus';
 
 Vue.use(Card);
-Vue.use(Button);
 Vue.use(Tooltip);
 
 export default {
@@ -51,7 +60,7 @@ export default {
     };
   },
   created: function() {
-    this.item = new Rule(this.rule);
+    this.item = this.rule;
   },
   methods: {
     sweep(rule) {
@@ -64,7 +73,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          if (isRuleEnabled) return removeByKeyword(rule.keyword, rule.searchArea);
+          if (isRuleEnabled) return sweepByRule(rule);
           return this.switchStatus(rule);
         })
         .then(res => {
@@ -72,7 +81,7 @@ export default {
 
           // isSuccess from switchStatus
           if (res === true) {
-            return removeByKeyword(rule.keyword, rule.searchArea);
+            return sweepByRule(rule);
           }
 
           return false;
@@ -101,6 +110,32 @@ export default {
         return isSuccess;
       });
     },
+    deleteRule(id) {
+      this.$confirm('确定要删除该条规则吗？', '警告！', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        return this.$store.removeRuleByID(id).then(
+          isSuccess => {
+            this.$message({
+              type: 'success',
+              showClose: true,
+              message: '删除成功',
+              duration: 1000,
+            });
+            this.$emit('delete-rule', id);
+          },
+          () => {
+            this.$message({
+              type: 'warning',
+              showClose: true,
+              message: '删除失败',
+            });
+          }
+        );
+      });
+    },
   },
 };
 </script>
@@ -118,5 +153,12 @@ export default {
 }
 .disable-btn {
   color: #777;
+}
+.ctrl-bar {
+  clear: both;
+}
+.delete-btn {
+  float: right;
+  color: #f56c6c;
 }
 </style>

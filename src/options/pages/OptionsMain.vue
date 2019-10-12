@@ -10,7 +10,7 @@
       v-for="rule in rules"
       :key="rule.id"
     >
-      <rule-board :rule="rule"></rule-board>
+      <rule-board :rule="rule" @delete-rule="onDeleteItem"></rule-board>
     </el-col>
   </el-row>
 </template>
@@ -32,9 +32,18 @@ export default {
     };
   },
   created() {
-    this.$store.getRules().then(rules => {
-      this.rules = rules;
-    });
+    this.fetchRules();
+  },
+  methods: {
+    fetchRules() {
+      this.$store.getRules().then(rules => {
+        this.rules = rules;
+      });
+    },
+    onDeleteItem(id) {
+      const index = this.rules.findIndex(rule => rule.id === id);
+      this.rules.splice(index, 1);
+    },
   },
 };
 </script>

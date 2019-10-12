@@ -63,11 +63,10 @@ function checkKeyword(key) {
  * @param {string} [opt.area='ALL'] - search area includes ALL/URL/TITLE
  * @return { Promise } removed count
  */
-export function removeByKeyword(key, area = 'ALL') {
+export function sweepByKeyword(key, area = 'ALL') {
   checkKeyword(key);
 
   return search({ text: key, area }).then(urls => {
-    console.log('should be removed urls: ', urls);
     return doRemoved ? remove(urls) : 0;
   });
 }
@@ -80,7 +79,7 @@ export function removeByKeyword(key, area = 'ALL') {
  * @param {Date} [endTime=new Date().getTime()] - millisecond
  * @return { Promise } removed count
  */
-export function removeByKeywordInRange(key, startTime = START_TIME, endTime = new Date().getTime()) {
+export function sweepByKeywordInRange(key, startTime = START_TIME, endTime = new Date().getTime()) {
   checkKeyword(key);
 
   const _start = new Date(startTime);
@@ -95,7 +94,27 @@ export function removeByKeywordInRange(key, startTime = START_TIME, endTime = ne
   }
 
   return search({ text: key, startTime: _start.getTime(), endTime: _end.getTime() }).then(urls => {
-    console.log('should be removed urls: ', urls);
     if (doRemoved) remove(urls);
   });
+}
+
+export function sweepByRule(rule) {
+  const _execute = rule.getExcutedRule();
+
+  if (_execute.type === 'url') {
+    console.log('execute with url', url);
+  }
+
+  if (_execute.type === 'keyword') {
+    return sweepByKeyword(_execute.keyword, _execute.searchArea);
+  }
+  return Promise.reject('no executable rule');
+}
+
+export function sweepByRuleList(rules) {
+  const promises = [];
+  rules.forEach(rule => {
+    promises.push(sweepByRule(rule));
+  });
+  return Promise.all(promises);
 }

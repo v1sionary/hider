@@ -1,7 +1,7 @@
 const browser = (global.browser = require('webextension-polyfill'));
 
 import Store from './libs/store';
-import { removeByKeyword } from './libs/sweeper';
+import { sweepByRuleList } from './libs/sweeper';
 
 // todo
 // find & remove history which are match the rules
@@ -15,9 +15,7 @@ browser.windows.onCreated.addListener(() => {
   // when open a browser
   setTimeout(() => {
     store.getEnabledRules().then(rules => {
-      rules.forEach(rule => {
-        removeByKeyword(rule.keyword, rule.searchArea);
-      });
+      sweepByRuleList(rules);
     });
   }, 1000);
 });

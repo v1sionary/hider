@@ -33,7 +33,7 @@
 
 <script>
 import Vue from 'vue';
-import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Radio, Button, Switch } from 'element-ui';
+import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Radio, Switch } from 'element-ui';
 
 import Rule from '../../libs/Rule';
 
@@ -45,7 +45,6 @@ Vue.use(Form);
 Vue.use(FormItem);
 Vue.use(Input);
 Vue.use(Radio);
-Vue.use(Button);
 Vue.use(Switch);
 
 export default {
@@ -96,11 +95,8 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
-      })
-        .then(() => {
-          return this.$store.removeByID(id);
-        })
-        .then(
+      }).then(() => {
+        return this.$store.removeRuleByID(id).then(
           isSuccess => {
             this.$message({
               type: 'success',
@@ -118,6 +114,7 @@ export default {
             });
           }
         );
+      });
     },
   },
 };
