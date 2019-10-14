@@ -5,15 +5,10 @@
         <router-link tag="span" style="cursor:pointer" to="/">Hider</router-link>
       </h1>
       <div style="width:150px;line-height:60px;text-align:right">
-        <router-link
-          v-show="$route.name !== 'edit'"
-          to="/edit/"
-          tag="el-button"
-          type="primary"
-          plain
-          round
-          size="small"
-        >新增</router-link>
+        <router-link v-if="$route.name === 'main'" to="/edit/">
+          <el-button type="primary" plain size="small" icon="el-icon-plus">新增</el-button>
+        </router-link>
+        <el-button plain size="small" icon="el-icon-s-tools">设置</el-button>
       </div>
     </el-header>
     <el-main class="main">
