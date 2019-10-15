@@ -2,7 +2,7 @@ import Rule from '../libs/Rule';
 const browser = require('webextension-polyfill');
 
 const RULE_STORE_KEY = 'HIDER_RULES';
-const LAST_EXECUTED_KEY = 'LAST_EXECUTED';
+const LAST_EXECUTED_KEY = 'HIDER_LAST_EXECUTED';
 
 let singleton;
 

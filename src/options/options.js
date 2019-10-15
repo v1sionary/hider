@@ -6,10 +6,12 @@ import App from './App';
 import { Button } from 'element-ui';
 
 import './common.css';
+import { isVerified } from '../libs/guard';
 
 // page
 import OptionsMain from './pages/OptionsMain';
 import OptionsEdit from './pages/OptionsEdit';
+import OptionsVertify from './pages/OptionsVertify';
 
 global.browser = require('webextension-polyfill');
 
@@ -27,9 +29,31 @@ const routes = [
     path: '/edit/:ID?',
     component: OptionsEdit,
   },
+  {
+    name: 'vertify',
+    path: '/vertify',
+    meta: { public: true },
+    component: OptionsVertify,
+  },
+  {
+    path: '*',
+    redirect: {
+      name: 'vertify',
+    },
+  },
 ];
 const router = new VueRouter({
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (!to.meta || !to.meta.public) {
+    if (!isVerified()) {
+      next({ name: 'vertify' });
+      return;
+    }
+  }
+  next();
 });
 
 browser.runtime.getBackgroundPage().then(bg => {
