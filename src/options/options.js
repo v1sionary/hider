@@ -6,7 +6,7 @@ import App from './App';
 import { Button } from 'element-ui';
 
 import './common.css';
-import { isVerified } from '../libs/guard';
+import { isAuth, initGuard } from '../libs/guard';
 
 // page
 import OptionsMain from './pages/OptionsMain';
@@ -48,7 +48,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   if (!to.meta || !to.meta.public) {
-    if (!isVerified()) {
+    if (!isAuth()) {
       next({ name: 'vertify' });
       return;
     }
@@ -56,15 +56,19 @@ router.beforeEach((to, from, next) => {
   next();
 });
 
-browser.runtime.getBackgroundPage().then(bg => {
-  setTimeout(() => {
+browser.runtime
+  .getBackgroundPage()
+  .then(bg => {
     Vue.prototype.$store = bg.$store;
-
-    /* eslint-disable no-new */
-    new Vue({
-      el: '#app',
-      router,
-      render: h => h(App),
-    });
-  }, 100);
-});
+    return initGuard();
+  })
+  .then(() => {
+    setTimeout(() => {
+      /* eslint-disable no-new */
+      new Vue({
+        el: '#app',
+        router,
+        render: h => h(App),
+      });
+    }, 100);
+  });
