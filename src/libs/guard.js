@@ -20,7 +20,12 @@ export function initGuard() {
     })
     .then(res => {
       // set verified flag while no guard or no password
-      if (!res) _isVerified = true;
+      if (!res) {
+        _isVerified = true;
+      } else {
+        // read verified status from session
+        _isVerified = sessionStorage.getItem('isVerified') === 'true';
+      }
       return true;
     });
 }
@@ -38,6 +43,15 @@ export function getGuarding() {
 
 export function isAuth() {
   return !_isGuarding || _isVerified;
+}
+
+export function getGuardingInfo() {
+  return getStorePassword().then(password => {
+    return {
+      enabled: _isGuarding,
+      password: !!password,
+    };
+  });
 }
 
 export function isPasswordVaild(pwd) {
@@ -60,6 +74,7 @@ export function verifyPassword(password) {
     if (!storedPassword) return Promise.reject('no password been set');
     const _isEqual = storedPassword === encryptedPassword;
     if (_isEqual) _isVerified = true;
+    sessionStorage.setItem('isVerified', _isVerified);
     return _isEqual;
   });
 }

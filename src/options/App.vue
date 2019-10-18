@@ -4,11 +4,11 @@
       <h1 style="flex: 1;">
         <router-link tag="span" style="cursor:pointer" to="/">Hider</router-link>
       </h1>
-      <div style="width:150px;line-height:60px;text-align:right">
-        <router-link v-if="$route.name === 'main'" to="/edit/">
-          <el-button type="primary" plain size="small" icon="el-icon-plus">新增</el-button>
+      <div class="header-right" v-if="$route.name !== 'vertify'">
+        <router-link tag="span" style="cursor:pointer;color: #409eff;" to="/setting">
+          <i class="el-icon-setting"></i>
+          设置
         </router-link>
-        <el-button plain size="small" icon="el-icon-s-tools">设置</el-button>
       </div>
     </el-header>
     <el-main class="main">
@@ -37,9 +37,18 @@ export default {
   min-width: 990px;
   background: #fff;
 }
+
 .header {
   display: flex;
 }
+
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 250px;
+}
+
 .main {
   background: #eee;
 }

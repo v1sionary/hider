@@ -12,6 +12,7 @@ import { isAuth, initGuard } from '../libs/guard';
 import OptionsMain from './pages/OptionsMain';
 import OptionsEdit from './pages/OptionsEdit';
 import OptionsVertify from './pages/OptionsVertify';
+import OptionsSetting from './pages/OptionsSetting';
 
 global.browser = require('webextension-polyfill');
 
@@ -30,15 +31,27 @@ const routes = [
     component: OptionsEdit,
   },
   {
+    name: 'setting',
+    path: '/setting',
+    component: OptionsSetting,
+  },
+  {
     name: 'vertify',
     path: '/vertify',
     meta: { public: true },
     component: OptionsVertify,
+    beforeEnter: (to, from, next) => {
+      if (!isAuth()) {
+        next();
+        return;
+      }
+      next('/');
+    },
   },
   {
     path: '*',
     redirect: {
-      name: 'vertify',
+      name: 'main',
     },
   },
 ];

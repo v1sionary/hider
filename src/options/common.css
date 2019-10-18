@@ -3,3 +3,23 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.hider-panel {
+  background-color: #ffffff;
+  border-radius: 5px;
+  margin-top: 0;
+  margin-left: 3px;
+  margin-right: 3px;
+  padding: 7px 10px;
+}
+
+.hider-panel:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.hider-panel-title {
+  display: block;
+  margin-bottom: -10px;
+  font-size: 20px;
+  color: #000;
+}
