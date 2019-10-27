@@ -5,7 +5,7 @@
       <el-divider></el-divider>
       <el-form class="form" ref="guarding" :model="guarding" :rules="rules.guarding" label-width="80px">
         <el-form-item label="启用" prop="enabled" size="small">
-          <el-switch v-model="guarding.enabled"></el-switch>
+          <el-switch v-model="guarding._enabled" @change="toggleGuarding"></el-switch>
         </el-form-item>
         <transition name="fade">
           <div v-if="guarding.enabled">
@@ -19,9 +19,10 @@
             <el-form-item label="确认密码" prop="confirmPassword" v-if="passwordEditable">
               <el-input placeholder="请确认密码" v-model="guarding.confirmPassword" show-password></el-input>
             </el-form-item>
+
+            <el-button plain size="mini" @click="saveGuarding" v-if="passwordEditable">保存</el-button>
           </div>
         </transition>
-        <el-button plain size="mini" @click="saveGuarding">保存</el-button>
       </el-form>
     </div>
   </div>
@@ -32,7 +33,7 @@ import Vue from 'vue';
 
 import { Divider, Form, FormItem, Input, Switch, Button } from 'element-ui';
 
-import { getGuardingInfo, setGuarding, setPassword, verifyPassword } from '../../libs/guard';
+import { getGuardingInfo, setGuarding, setPassword, verifyPassword, isPasswordVaild, resetPassword } from '../../libs/guard';
 
 Vue.use(Divider);
 Vue.use(Form);
@@ -54,71 +55,103 @@ export default {
         }
       });
     };
+    const checkPassword = (rule, value, callback) => {
+      if (!value || isPasswordVaild(value)) return callback();
+      callback('密码至少包含6个字符');
+    };
     const confirmPassword = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请再次输入密码'));
-      } else if (value !== this.guarding.password) {
+      if (!!this.guarding.password && value !== this.guarding.password) {
         callback(new Error('两次输入密码不一致!'));
       } else {
         callback();
       }
     };
     return {
+      toggleTimer: void 0,
       passwordEditable: false,
       guarding: {
         password: '',
+        _enabled: false,
         enabled: false,
         setPassword: false,
       },
       rules: {
         guarding: {
           oldPassword: [{ required: true, message: '请输入密码', trigger: 'blur' }, { validator: checkOldPassword, trigger: 'blur' }],
-          password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '长度至少6个字符', trigger: 'blur' }],
-          confirmPassword: [
-            { required: true, message: '请确认密码', trigger: 'blur' },
-            { min: 6, message: '长度至少6个字符', trigger: 'blur' },
-            { validator: confirmPassword, trigger: 'blur' },
-          ],
+          password: [{ validator: checkPassword, trigger: 'blur' }],
+          confirmPassword: [{ validator: confirmPassword, trigger: 'blur' }],
         },
       },
     };
   },
   created() {
     getGuardingInfo().then(info => {
-      this.guarding.enabled = info.enabled;
+      this.guarding.enabled = this.guarding._enabled = info.enabled;
       this.guarding.setPassword = info.password;
       this.passwordEditable = !this.guarding.setPassword;
     });
   },
   methods: {
     saveGuarding() {
-      this.$refs['guarding'].validate(vaild => {
-        if (vaild) {
-          const enabled = this.guarding.enabled;
-          setGuarding(enabled)
-            .then(() => {
-              if (enabled) {
-                return setPassword(this.guarding.password);
-              }
-              return true;
-            })
-            .then(success => {
-              if (success) {
-                this.$message({
-                  type: 'success',
-                  message: '保存成功',
-                });
-                this.guarding.setPassword = true;
-                this.passwordEditable = false;
-              } else {
-                this.$message({
-                  type: 'error',
-                  message: '保存失败',
-                });
-              }
-            });
+      this.$refs['guarding'].validate(
+        vaild => {
+          if (vaild) {
+            const enabled = this.guarding.enabled;
+            setGuarding(enabled)
+              .then(() => {
+                if (enabled) {
+                  if (!this.guarding.password) {
+                    return this.$confirm('确定要把密码设置为空吗？', '警告！', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning',
+                    }).then(() => {
+                      return resetPassword().then(() => {
+                        return 'RESET';
+                      });
+                    });
+                  }
+
+                  return setPassword(this.guarding.password);
+                }
+                return true;
+              })
+              .then(success => {
+                if (success) {
+                  this.$message({
+                    type: 'success',
+                    message: '保存成功',
+                  });
+                  this.guarding.setPassword = success !== 'RESET';
+                  this.passwordEditable = success === 'RESET';
+                } else {
+                  this.$message({
+                    type: 'error',
+                    message: '保存失败',
+                  });
+                }
+              });
+          }
+        },
+        err => {
+          console.log(err);
         }
-      });
+      );
+    },
+    toggleGuarding() {
+      if (this.toggleTimer) clearTimeout(this.toggleTimer);
+      this.toggleTimer = setTimeout(() => {
+        const v = this.guarding._enabled;
+        setGuarding(v).then(() => {
+          this.guarding.enabled = v;
+          if (v && !this.guarding.setPassword) {
+            this.passwordEditable = true;
+          } else {
+            this.passwordEditable = false;
+          }
+          this.oldPassword = this.guarding.password = this.guarding.confirmPassword = '';
+        });
+      }, 300);
     },
   },
 };

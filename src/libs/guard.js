@@ -79,7 +79,7 @@ export function verifyPassword(password) {
   });
 }
 
-function resetPassword() {
+export function resetPassword() {
   return browser.storage.local.remove([PASSWORD_STORE_KEY]);
 }
 
