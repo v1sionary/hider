@@ -1,10 +1,10 @@
 <template>
   <div class="panel">
     <div class="row" @click="sweepAll()">
-      <i :class="executing ? 'el-icon-loading':'el-icon-s-promotion'"></i>
+      <i :class="executing ? 'el-icon-loading' : 'el-icon-s-promotion'"></i>
       立刻执行
     </div>
-    <div class="row executed-info disabled divider">上次执行：{{lastExecutedTime}}</div>
+    <div class="row executed-info disabled divider">上次执行：{{ lastExecutedTime }}</div>
     <div class="row" @click="openOptionPage">
       <i class="el-icon-setting"></i>
       管理面板
