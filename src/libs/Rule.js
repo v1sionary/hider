@@ -1,16 +1,23 @@
 // rules: match & execute & schedule
+import TimingTask from '../libs/TimingTask';
+
 let rule_id = 1;
-const RULE_PROPERTIES = ['id', 'enabled', 'url', 'keyword', 'searchArea'];
+const RULE_PROPERTIES = ['id', 'enabled', 'url', 'keyword', 'searchArea', 'ticking'];
 const RULE_PROPERTIES_DEFAULT = {
-  enabled: false,
+  enabled: true,
   url: '',
   keyword: '',
   searchArea: 'ALL',
+  ticking: false,
 };
 
 export default class Rule {
   constructor(opt = {}) {
     Object.assign(this, this.initProperties(opt));
+
+    if (this.ticking) {
+      this.setTask(this.timingTask || opt.timingTask);
+    }
   }
 
   initProperties(opt) {
@@ -48,5 +55,11 @@ export default class Rule {
       };
 
     return {};
+  }
+
+  setTask(opt) {
+    if (!this.ticking) return;
+
+    this.timingTask = new TimingTask({ type: 'periodic' });
   }
 }
