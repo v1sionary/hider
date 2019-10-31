@@ -49,11 +49,7 @@
             <el-radio-button label="date" name="timeUnit">每月</el-radio-button>
           </el-radio-group>
           <el-checkbox-group v-model="ruleTask.timings" size="mini" style="padding-left:10px;">
-            <el-checkbox :label="0" name="timings">0点</el-checkbox>
-            <el-checkbox :label="8" name="timings">8点</el-checkbox>
-            <el-checkbox :label="17" name="timings">17点</el-checkbox>
-            <el-checkbox :label="21" name="timings">21点</el-checkbox>
-            <el-checkbox :label="23" name="timings">23点</el-checkbox>
+            <el-checkbox v-for="t in timingList" :label="t.v" :key="t.k" name="timings">{{ t.k }}</el-checkbox>
           </el-checkbox-group>
         </div>
       </el-form-item>
@@ -84,6 +80,12 @@ Vue.use(Switch);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 
+const [hour_opts, day_opts, date_opts] = [
+  [{ v: 0, k: '0点' }, { v: 8, k: '8点' }, { v: 12, k: '12点' }, { v: 17, k: '17点' }, { v: 21, k: '21点' }, { v: 23, k: '23点' }],
+  [{ v: 1, k: '一' }, { v: 2, k: '二' }, { v: 3, k: '三' }, { v: 4, k: '四' }, { v: 5, k: '五' }, { v: 6, k: '六' }, { v: 7, k: '七' }],
+  [{ v: 1, k: '1日' }, { v: 10, k: '10日' }, { v: 15, k: '15日' }, { v: 20, k: '20日' }],
+];
+
 export default {
   name: 'OptionsEdit',
   data: function() {
@@ -102,6 +104,11 @@ export default {
         searchArea: [{ required: true, message: '请选择检索范围', trigger: 'blur' }],
       },
     };
+  },
+  computed: {
+    timingList: function() {
+      return this.ruleTask.timeUnit === 'hour' ? hour_opts : this.ruleTask.timeUnit === 'day' ? day_opts : date_opts;
+    },
   },
   created() {
     this.pid = this.$route.params.ID;
@@ -170,7 +177,7 @@ export default {
   padding: 15px 9px;
 }
 .rule-form {
-  width: 680px;
+  width: 780px;
 }
 .regular-warp {
   display: flex;
