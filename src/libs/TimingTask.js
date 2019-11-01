@@ -1,3 +1,5 @@
+import { getType } from './utils';
+
 export const PERIODS_MILLSECOND = {
   '15min': 900000,
   '30min': 1800000,
@@ -33,11 +35,12 @@ export default class TimingTask {
     }
 
     if (_type === 'periodic') {
+      const _p = props.period || def.period;
       Object.assign(this, {
         type: props.type,
         timeUnit: EMPTY_VAL,
         timings: EMPTY_VAL,
-        period: props.period || def.period,
+        period: getType(_p) === 'Number' ? _p : PERIODS_MILLSECOND[_p],
       });
     }
 

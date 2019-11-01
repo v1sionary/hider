@@ -69,6 +69,7 @@ import Vue from 'vue';
 import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Radio, RadioGroup, RadioButton, Switch, Checkbox, CheckboxGroup } from 'element-ui';
 
 import Rule from '../../libs/Rule';
+import { PERIODS_MILLSECOND } from '../../libs/TimingTask';
 
 Vue.use(Breadcrumb);
 Vue.use(BreadcrumbItem);
@@ -123,6 +124,7 @@ export default {
       this.$store.getRuleByID(this.pid).then(rule => {
         this.ruleForm = rule;
         this.setTaskForm(this.ruleForm);
+        console.log(this.ruleForm);
       });
     } else {
       this.ruleForm = new Rule(this.ruleForm);
@@ -198,7 +200,8 @@ export default {
 
       this.taskEnabled = (rule.ticking && _task && _task.type) || 'close';
 
-      this.ruleTask.period = _task.period || '1h';
+      debugger;
+      this.ruleTask.period = PERIODS_MILLSECOND[_task.period] || _task.period || '1h';
       this.ruleTask.timeUnit = _task.timeUnit || 'hour';
       this.ruleTask.timings = _task.timings || [0];
     },
