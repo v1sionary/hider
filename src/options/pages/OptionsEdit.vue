@@ -7,6 +7,7 @@
     <el-divider content-position="right">
       <i class="el-icon-edit"></i>
     </el-divider>
+
     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="rule-form">
       <el-form-item label="启用" prop="enabled" size="small">
         <el-switch v-model="ruleForm.enabled"></el-switch>
@@ -19,20 +20,22 @@
         <el-radio v-model="ruleForm.searchArea" label="URL">URL</el-radio>
         <el-radio v-model="ruleForm.searchArea" label="TITLE">标题</el-radio>
       </el-form-item>
+    </el-form>
 
-      <el-divider content-position="center">
-        <i class="el-icon-alarm-clock"></i>
-      </el-divider>
+    <el-divider content-position="center">
+      <i class="el-icon-alarm-clock"></i>
+    </el-divider>
 
+    <el-form :model="ruleTask" :rules="taskRules" ref="ruleTask" label-width="80px" class="rule-form">
       <el-form-item label="定时任务" prop="taskEnabled">
-        <el-radio-group v-model="ruleTask.taskEnabled" size="mini">
+        <el-radio-group v-model="taskEnabled" size="mini">
           <el-radio-button label="close" name="taskEnabled">关闭</el-radio-button>
           <el-radio-button label="periodic" name="taskEnabled">间隔</el-radio-button>
           <el-radio-button label="regular" name="taskEnabled">定时</el-radio-button>
         </el-radio-group>
       </el-form-item>
 
-      <el-form-item label="间隔" prop="period" v-if="ruleTask.taskEnabled === 'periodic'">
+      <el-form-item label="间隔" prop="period" v-if="taskEnabled === 'periodic'">
         <el-radio-group v-model="ruleTask.period" size="mini">
           <el-radio label="15min" name="period">15分钟</el-radio>
           <el-radio label="30min" name="period">30分钟</el-radio>
@@ -41,22 +44,23 @@
         </el-radio-group>
       </el-form-item>
 
-      <el-form-item label="定期" prop="regular" v-if="ruleTask.taskEnabled === 'regular'">
+      <el-form-item label="定期" prop="timings" v-if="taskEnabled === 'regular'">
         <div class="regular-warp">
-          <el-radio-group v-model="ruleTask.timeUnit" size="mini" style="line-height:40px;">
+          <el-radio-group v-model="ruleTask.timeUnit" size="mini" style="line-height:40px;" @change="resetTimings">
             <el-radio-button label="hour" name="timeUnit">每天</el-radio-button>
             <el-radio-button label="day" name="timeUnit">每周</el-radio-button>
             <el-radio-button label="date" name="timeUnit">每月</el-radio-button>
           </el-radio-group>
+
           <el-checkbox-group v-model="ruleTask.timings" size="mini" style="padding-left:10px;">
-            <el-checkbox v-for="t in timingList" :label="t.v" :key="t.k" name="timings">{{ t.k }}</el-checkbox>
+            <el-checkbox v-for="t in timingList" :label="t.v" :key="t.k" name="timings" required>{{ t.k }}</el-checkbox>
           </el-checkbox-group>
         </div>
       </el-form-item>
-
-      <el-button plain size="small" @click="save">保存</el-button>
-      <el-button plain size="small" type="danger" @click.prevent="removeRule(ruleForm.id)" v-if="pid">删除</el-button>
     </el-form>
+
+    <el-button plain size="small" @click="save">保存</el-button>
+    <el-button plain size="small" type="danger" @click.prevent="removeRule(ruleForm.id)" v-if="pid">删除</el-button>
   </div>
 </template>
 
@@ -90,11 +94,11 @@ export default {
   name: 'OptionsEdit',
   data: function() {
     return {
+      taskEnabled: 'close',
       ruleForm: {
         keyword: '',
       },
       ruleTask: {
-        taskEnabled: 'close',
         period: '1h',
         timeUnit: 'hour',
         timings: [0],
@@ -102,6 +106,9 @@ export default {
       rules: {
         keyword: [{ required: true, message: '请输入关键字', trigger: 'blur' }],
         searchArea: [{ required: true, message: '请选择检索范围', trigger: 'blur' }],
+      },
+      taskRules: {
+        timings: [{ required: true, message: '请选择时间点', trigger: 'blur' }],
       },
     };
   },
@@ -115,29 +122,46 @@ export default {
     if (this.pid) {
       this.$store.getRuleByID(this.pid).then(rule => {
         this.ruleForm = rule;
+        this.setTaskForm(this.ruleForm);
       });
     } else {
-      this.ruleForm = new Rule({ ticking: true });
+      this.ruleForm = new Rule(this.ruleForm);
+      this.setTaskForm(this.ruleForm);
     }
-    this.ruleTask.taskEnabled = (this.ruleForm.ticking && this.ruleForm.timingTask && this.ruleForm.timingTask.type) || 'close';
   },
   methods: {
-    save() {
-      this.$refs.ruleForm.validate(valid => {
-        if (valid) {
-          // 本地存储
-          this.$store.saveRule(this.ruleForm, !!this.pid).then(() => {
-            this.$message({
-              showClose: true,
-              message: '保存成功',
-              type: 'success',
-              duration: 1000,
+    _validate(...formRef) {
+      const promises = [];
+
+      formRef.forEach(ref => {
+        promises.push(
+          new Promise((resolve, reject) => {
+            this.$refs[ref].validate(valid => {
+              if (valid) resolve();
             });
-            this.$router.push('/');
-          });
-        } else {
-          return false;
+          })
+        );
+      });
+
+      return Promise.all(promises);
+    },
+
+    save() {
+      this._validate('ruleForm', 'ruleTask').then(res => {
+        if (this.taskEnabled) {
+          this.ruleForm.ticking = true;
+          this.ruleForm.timingTask = Object.assign({ type: this.taskEnabled }, this.ruleTask);
         }
+
+        this.$store.saveRule(this.ruleForm, !!this.pid).then(() => {
+          this.$message({
+            showClose: true,
+            message: '保存成功',
+            type: 'success',
+            duration: 1000,
+          });
+          this.$router.push('/');
+        });
       });
     },
 
@@ -166,6 +190,26 @@ export default {
           }
         );
       });
+    },
+
+    // 设置表单项
+    setTaskForm(rule) {
+      const _task = rule.timingTask || {};
+
+      this.taskEnabled = (rule.ticking && _task && _task.type) || 'close';
+
+      this.ruleTask.period = _task.period || '1h';
+      this.ruleTask.timeUnit = _task.timeUnit || 'hour';
+      this.ruleTask.timings = _task.timings || [0];
+    },
+
+    resetTimings() {
+      const formUnit = this.ruleTask.timeUnit;
+      if (formUnit === this.ruleForm.timingTask.timeUnit) {
+        this.ruleTask.timings = this.ruleForm.timingTask.timings;
+      } else {
+        this.ruleTask.timings = formUnit === 'hour' ? [0] : [1];
+      }
     },
   },
 };

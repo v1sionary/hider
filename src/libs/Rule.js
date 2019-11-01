@@ -2,7 +2,7 @@
 import TimingTask from '../libs/TimingTask';
 
 let rule_id = 1;
-const RULE_PROPERTIES = ['id', 'enabled', 'url', 'keyword', 'searchArea', 'ticking'];
+const RULE_PROPERTIES = ['id', 'enabled', 'url', 'keyword', 'searchArea', 'ticking', 'timingTask'];
 const RULE_PROPERTIES_DEFAULT = {
   enabled: true,
   url: '',
@@ -57,9 +57,9 @@ export default class Rule {
     return {};
   }
 
-  setTask(opt) {
+  setTask(task) {
     if (!this.ticking) return;
 
-    this.timingTask = new TimingTask({ type: 'periodic' });
+    this.timingTask = new TimingTask(task);
   }
 }
