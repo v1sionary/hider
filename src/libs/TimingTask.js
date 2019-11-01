@@ -7,6 +7,11 @@ export const PERIODS_MILLSECOND = {
   '12h': 43200000,
 };
 
+export const MILLSECOND_PERIODS = Object.keys(PERIODS_MILLSECOND).reduce((map, key) => {
+  map[PERIODS_MILLSECOND[key]] = key;
+  return map;
+}, {});
+
 const def = {
   // regular / periodic
   type: 'regular',
