@@ -61,7 +61,7 @@ function checkKeyword(key) {
  *
  * @param {string} key search keyword
  * @param {string} [opt.area='ALL'] - search area includes ALL/URL/TITLE
- * @return { Promise } removed count
+ * @return { Promise<Number> } Promise with removed count
  */
 export function sweepByKeyword(key, area = 'ALL') {
   checkKeyword(key);
@@ -98,6 +98,11 @@ export function sweepByKeywordInRange(key, startTime = START_TIME, endTime = new
   });
 }
 
+/**
+ * excute sweep according to a rule
+ * @param {Rule} rule a sweep Rule
+ * @returns { Promise<Number> } Promise with removed count
+ */
 export function sweepByRule(rule) {
   const _execute = rule.getExcutedRule();
 
@@ -111,6 +116,11 @@ export function sweepByRule(rule) {
   return Promise.reject('no executable rule');
 }
 
+/**
+ * excute sweep according to a rule list
+ * @param {Rule[]} rules sweep Rules
+ * @returns {Promise<Number[]>} Promise with removed count in per sweep rule
+ */
 export function sweepByRuleList(rules) {
   const promises = [];
   rules.forEach(rule => {

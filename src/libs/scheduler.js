@@ -1,4 +1,3 @@
-// https://developer.chrome.com/apps/alarms
 const browser = require('webextension-polyfill');
 
 /**
@@ -56,6 +55,7 @@ export function deleteAlarm(ruleid) {
 /**
  * delete alarm by Alarm name
  * @param {String} name alarm name
+ * @returns {Promise<boolean>} wasClear Promise
  */
 export function deleteAlarmByName(name) {
   return browser.alarms.clear(name);
@@ -64,6 +64,7 @@ export function deleteAlarmByName(name) {
 /**
  * delete all unmatch Alarms
  * @param {String[]} ruleIds existed Rule ids
+ * @returns {Promise<Number>} a Promise with deleted count
  */
 export function clearUnmatchAlarms(ruleIds) {
   if (!ruleIds || !Array.isArray(ruleIds)) throw new Error('must provide Rule id list');
@@ -96,6 +97,7 @@ export function clearAllAlarms() {
 /**
  * give a alarm name
  * @param {String} ruleid rule id
+ * @returns {String} alarm name
  */
 function nameAlarmName(ruleid) {
   return `ALARM_${ruleid}`;

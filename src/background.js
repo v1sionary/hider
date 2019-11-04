@@ -34,16 +34,16 @@ const getRuleId = alarmName => {
 browser.alarms.onAlarm.addListener(alarm => {
   const _ruleId = getRuleId(alarm.name);
 
-  if (!_ruleId) deleteAlarmByName(alarm.name);
+  if (!_ruleId) return deleteAlarmByName(alarm.name);
 
   store.getRuleByID(_ruleId).then(rule => {
-    if (!rule || !rule.ticking) deleteAlarmByName(alarm.name);
+    if (!rule || !rule.ticking) return deleteAlarmByName(alarm.name);
 
     sweepByRule(rule)
       .then(removedCount => {
         console.log('removed count', removedCount);
         rule.timingTask.updateExcutedTime();
-        store.saveRule(rule);
+        store.saveRule(rule, true);
       })
       .catch(() => {
         deleteAlarmByName(alarm.name);

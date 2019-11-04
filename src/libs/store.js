@@ -40,6 +40,11 @@ export default class Store {
     return Promise.resolve(new Rule(this.rulesMap[id]));
   }
 
+  /**
+   * save Rule into storage
+   * @param {Rule} rule a sweep rule
+   * @param {boolean} overwrite weather overwrite the exist Rule
+   */
   saveRule(rule, overwrite) {
     if (this.rulesMap[rule.id] && !overwrite) return Promise.reject('already existed!');
 

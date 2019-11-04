@@ -124,7 +124,6 @@ export default {
     if (this.pid) {
       this.$store.getRuleByID(this.pid).then(rule => {
         this.ruleForm = rule;
-        console.log(rule);
         this.setTaskForm(this.ruleForm);
       });
     } else {
