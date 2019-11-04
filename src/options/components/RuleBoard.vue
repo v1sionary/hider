@@ -3,37 +3,19 @@
     <div class="row-first">
       <h2 class="title ellipsis">
         <rule-status :status="item.enabled"></rule-status>
-        {{item.keyword || item.url}}
+        {{ item.keyword || item.url }}
       </h2>
     </div>
     <div class="ctrl-bar">
-      <el-button
-        type="primary"
-        icon="el-icon-magic-stick"
-        size="mini"
-        @click.prevent="sweep(item)"
-      >执行清除</el-button>
-      <router-link
-        :to="{name: 'edit', params: {ID: item.id}}"
-        style="display:inline-block;margin: 0 10px;"
-      >
+      <el-button type="primary" icon="el-icon-magic-stick" size="mini" @click.prevent="sweep(item)">执行清除</el-button>
+      <router-link :to="{ name: 'edit', params: { ID: item.id } }" style="display:inline-block;margin: 0 10px;">
         <el-button type="text" icon="el-icon-edit" size="mini">编辑</el-button>
       </router-link>
-      <el-button
-        type="text"
-        icon="el-icon-switch-button"
-        size="mini"
-        :class="{'disable-btn' : item.enabled}"
-        @click.prevent="switchStatus(item)"
-      >{{item.enabled ? '停用' : '启用'}}</el-button>
+      <el-button type="text" icon="el-icon-switch-button" size="mini" :class="{ 'disable-btn': item.enabled }" @click.prevent="switchStatus(item)">{{
+        item.enabled ? '停用' : '启用'
+      }}</el-button>
 
-      <el-button
-        type="text"
-        icon="el-icon-delete"
-        size="mini"
-        class="delete-btn"
-        @click.prevent="deleteRule(item.id)"
-      >删除</el-button>
+      <el-button type="text" icon="el-icon-delete" size="mini" class="delete-btn" @click.prevent="deleteRule(item.id)">删除</el-button>
     </div>
   </el-card>
 </template>
@@ -97,8 +79,8 @@ export default {
     },
     switchStatus(rule) {
       const _data = new Rule(Object.assign({}, rule, { enabled: !rule.enabled }));
-      return this.$store.saveRule(_data, true).then(isSuccess => {
-        if (isSuccess === true) {
+      return this.$store.saveRule(_data, true).then(rule => {
+        if (!!rule) {
           rule.enabled = !rule.enabled;
         } else {
           this.$message({

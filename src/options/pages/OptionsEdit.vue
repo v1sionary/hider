@@ -69,7 +69,8 @@ import Vue from 'vue';
 import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Radio, RadioGroup, RadioButton, Switch, Checkbox, CheckboxGroup } from 'element-ui';
 
 import Rule from '../../libs/Rule';
-import { PERIODS_MILLSECOND, MILLSECOND_PERIODS } from '../../libs/TimingTask';
+import { MINUTES_PERIODS, default as TimingTask } from '../../libs/TimingTask';
+import { createAlarm, getAlarmList } from '../../libs/scheduler';
 
 Vue.use(Breadcrumb);
 Vue.use(BreadcrumbItem);
@@ -123,6 +124,7 @@ export default {
     if (this.pid) {
       this.$store.getRuleByID(this.pid).then(rule => {
         this.ruleForm = rule;
+        console.log(rule);
         this.setTaskForm(this.ruleForm);
       });
     } else {
@@ -151,10 +153,15 @@ export default {
       this._validate('ruleForm', 'ruleTask').then(res => {
         if (this.taskEnabled) {
           this.ruleForm.ticking = true;
-          this.ruleForm.timingTask = Object.assign({ type: this.taskEnabled }, this.ruleTask);
+          this.ruleForm.timingTask = new TimingTask(Object.assign({ type: this.taskEnabled }, this.ruleForm.timingTask, this.ruleTask));
         }
 
-        this.$store.saveRule(this.ruleForm, !!this.pid).then(() => {
+        this.$store.saveRule(this.ruleForm, !!this.pid).then(rule => {
+          if (rule.ticking === true) {
+            const alarmOpt = Object.assign({ ruleId: rule.id }, rule.timingTask.getAlarmOpt());
+            createAlarm(alarmOpt);
+          }
+
           this.$message({
             showClose: true,
             message: '保存成功',
@@ -199,12 +206,16 @@ export default {
 
       this.taskEnabled = (rule.ticking && _task && _task.type) || 'close';
 
-      this.ruleTask.period = MILLSECOND_PERIODS[_task.period] || _task.period || '1h';
+      this.ruleTask.period = MINUTES_PERIODS[_task.period] || _task.period || '1h';
       this.ruleTask.timeUnit = _task.timeUnit || 'hour';
       this.ruleTask.timings = _task.timings || [0];
     },
 
+    /**
+     * 将 periodic 毫秒数转换成对应的选项
+     */
     resetTimings() {
+      if (!this.ruleForm.ticking || this.ruleForm.timingTask.type !== 'periodic') return;
       const formUnit = this.ruleTask.timeUnit;
       if (formUnit === this.ruleForm.timingTask.timeUnit) {
         this.ruleTask.timings = this.ruleForm.timingTask.timings;

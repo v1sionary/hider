@@ -1,14 +1,14 @@
 import { getType } from './utils';
 
-export const PERIODS_MILLSECOND = {
-  '15min': 900000,
-  '30min': 1800000,
-  '1h': 3600000,
-  '12h': 43200000,
+export const PERIODS_MINUTES = {
+  '15min': 15,
+  '30min': 30,
+  '1h': 60,
+  '12h': 72,
 };
 
-export const MILLSECOND_PERIODS = Object.keys(PERIODS_MILLSECOND).reduce((map, key) => {
-  map[PERIODS_MILLSECOND[key]] = key;
+export const MINUTES_PERIODS = Object.keys(PERIODS_MINUTES).reduce((map, key) => {
+  map[PERIODS_MINUTES[key]] = key;
   return map;
 }, {});
 
@@ -18,7 +18,7 @@ const def = {
   // hour / date / day /
   timeUnit: 'hour',
   timings: [8],
-  period: PERIODS_MILLSECOND['1h'],
+  period: PERIODS_MINUTES['1h'],
 };
 const EMPTY_VAL = void 0;
 
@@ -45,16 +45,28 @@ export default class TimingTask {
         type: props.type,
         timeUnit: EMPTY_VAL,
         timings: EMPTY_VAL,
-        period: getType(_p) === 'Number' ? _p : PERIODS_MILLSECOND[_p],
+        period: getType(_p) === 'Number' ? _p : PERIODS_MINUTES[_p],
       });
     }
 
-    if (!props.createdTime) {
-      this.createdTime = new Date().getTime();
+    this.createdTime = props.createdTime || new Date().getTime();
+    this.lastExcutedTime = props.lastExcutedTime || EMPTY_VAL;
+  }
+
+  getAlarmOpt() {
+    if (this.type === 'regular') {
+      return {
+        delay: 1,
+        period: 1,
+      };
     }
 
-    if (!props.lastExcutedTime) {
-      this.lastExcutedTime = EMPTY_VAL;
-    }
+    return {
+      delay: 1,
+    };
+  }
+
+  updateExcutedTime() {
+    this.lastExcutedTime = new Date().getTime();
   }
 }

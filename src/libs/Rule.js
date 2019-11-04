@@ -32,6 +32,7 @@ export default class Rule {
   }
 
   getProperties(rule = this) {
+    if (!!rule.ticking) rule.setTask(rule.timingTask);
     return Object.keys(rule)
       .filter(key => RULE_PROPERTIES.includes(key))
       .reduce((res, key) => {

@@ -45,8 +45,7 @@ export default class Store {
 
     this.rulesMap[rule.id] = rule.getProperties();
     return browser.storage.local.set({ [RULE_STORE_KEY]: this.rulesMap }).then(() => {
-      // isSuccess -> true
-      return true;
+      return this.rulesMap[rule.id];
     });
   }
 
