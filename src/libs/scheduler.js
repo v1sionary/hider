@@ -18,7 +18,7 @@ export function createAlarm(opt = {}) {
     browser.alarms.create(nameAlarmName(opt.ruleId), {
       when: opt.when,
       delayInMinutes: opt.delay,
-      periodInMinutes: 1,
+      periodInMinutes: opt.period,
     });
     resolve(true);
   });

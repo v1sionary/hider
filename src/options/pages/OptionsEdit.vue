@@ -70,7 +70,7 @@ import { Breadcrumb, BreadcrumbItem, Icon, Divider, Form, FormItem, Input, Radio
 
 import Rule from '../../libs/Rule';
 import { MINUTES_PERIODS, default as TimingTask } from '../../libs/TimingTask';
-import { createAlarm, getAlarmList } from '../../libs/scheduler';
+import { createAlarm, getAlarmList, deleteAlarm } from '../../libs/scheduler';
 
 Vue.use(Breadcrumb);
 Vue.use(BreadcrumbItem);
@@ -88,7 +88,7 @@ Vue.use(CheckboxGroup);
 
 const [hour_opts, day_opts, date_opts] = [
   [{ v: 0, k: '0点' }, { v: 8, k: '8点' }, { v: 12, k: '12点' }, { v: 17, k: '17点' }, { v: 21, k: '21点' }, { v: 23, k: '23点' }],
-  [{ v: 1, k: '一' }, { v: 2, k: '二' }, { v: 3, k: '三' }, { v: 4, k: '四' }, { v: 5, k: '五' }, { v: 6, k: '六' }, { v: 7, k: '七' }],
+  [{ v: 1, k: '一' }, { v: 2, k: '二' }, { v: 3, k: '三' }, { v: 4, k: '四' }, { v: 5, k: '五' }, { v: 6, k: '六' }, { v: 0, k: '日' }],
   [{ v: 1, k: '1日' }, { v: 10, k: '10日' }, { v: 15, k: '15日' }, { v: 20, k: '20日' }],
 ];
 
@@ -150,14 +150,15 @@ export default {
 
     save() {
       this._validate('ruleForm', 'ruleTask').then(res => {
-        if (this.taskEnabled) {
+        if (this.taskEnabled !== 'close') {
           this.ruleForm.ticking = true;
-          this.ruleForm.timingTask = new TimingTask(Object.assign({ type: this.taskEnabled }, this.ruleForm.timingTask, this.ruleTask));
+          this.ruleForm.timingTask = new TimingTask(Object.assign({}, this.ruleForm.timingTask, { type: this.taskEnabled }, this.ruleTask));
+          this.ruleForm.timingTask.updateNextExcutedTime();
         }
-
         this.$store.saveRule(this.ruleForm, !!this.pid).then(rule => {
           if (rule.ticking === true) {
             const alarmOpt = Object.assign({ ruleId: rule.id }, rule.timingTask.getAlarmOpt());
+            console.log(alarmOpt);
             createAlarm(alarmOpt);
           }
 
@@ -180,6 +181,7 @@ export default {
       }).then(() => {
         return this.$store.removeRuleByID(id).then(
           isSuccess => {
+            deleteAlarm(id);
             this.$message({
               type: 'success',
               showClose: true,
@@ -214,9 +216,9 @@ export default {
      * 将 periodic 毫秒数转换成对应的选项
      */
     resetTimings() {
-      if (!this.ruleForm.ticking || this.ruleForm.timingTask.type !== 'periodic') return;
+      if (this.taskEnabled !== 'regular') return;
       const formUnit = this.ruleTask.timeUnit;
-      if (formUnit === this.ruleForm.timingTask.timeUnit) {
+      if (this.ruleForm.timingTask && formUnit === this.ruleForm.timingTask.timeUnit) {
         this.ruleTask.timings = this.ruleForm.timingTask.timings;
       } else {
         this.ruleTask.timings = formUnit === 'hour' ? [0] : [1];

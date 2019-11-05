@@ -2,7 +2,7 @@ const browser = (global.browser = require('webextension-polyfill'));
 
 import Store from './libs/store';
 import { sweepByRuleList, sweepByRule } from './libs/sweeper';
-import { clearUnmatchAlarms, deleteAlarmByName } from './libs/scheduler';
+import { clearUnmatchAlarms, deleteAlarmByName, clearAllAlarms } from './libs/scheduler';
 
 const store = new Store();
 window.$store = store;
@@ -19,7 +19,11 @@ browser.windows.onCreated.addListener(() => {
         if (rule.enabled === true) _enabledRules.push(rule);
       });
       sweepByRuleList(_enabledRules);
-      clearUnmatchAlarms(ruleids).then(count => console.log('clear unmatch alarms: ', count));
+      if (!ruleids.length) {
+        clearAllAlarms();
+      } else {
+        clearUnmatchAlarms(ruleids).then(count => console.log('clear unmatch alarms: ', count));
+      }
     });
   }, 1000);
 });
@@ -41,9 +45,18 @@ browser.alarms.onAlarm.addListener(alarm => {
 
     sweepByRule(rule)
       .then(removedCount => {
-        console.log('removed count', removedCount);
-        rule.timingTask.updateExcutedTime();
+        console.log('removed count: ', removedCount);
+
+        const _task = rule.timingTask;
+
+        _task.updateExcutedTime();
+        _task.updateNextExcutedTime();
         store.saveRule(rule, true);
+
+        if ((rule.timingTask.type = 'regular')) {
+          const alarmOpt = Object.assign({ ruleId: rule.id }, _task.getAlarmOpt());
+          createAlarm(alarmOpt);
+        }
       })
       .catch(() => {
         deleteAlarmByName(alarm.name);

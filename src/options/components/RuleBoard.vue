@@ -26,6 +26,7 @@ import { Card, Tooltip } from 'element-ui';
 
 import Rule from '../../libs/Rule';
 import { sweepByRule } from '../../libs/sweeper';
+import { deleteAlarm } from '../../libs/scheduler';
 
 import RuleStatus from './RuleStatus';
 
@@ -100,6 +101,7 @@ export default {
       }).then(() => {
         return this.$store.removeRuleByID(id).then(
           isSuccess => {
+            deleteAlarm(id);
             this.$message({
               type: 'success',
               showClose: true,
