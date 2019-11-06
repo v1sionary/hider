@@ -121,7 +121,8 @@ export function sweepByRule(rule) {
  * @param {Rule[]} rules sweep Rules
  * @returns {Promise<Number[]>} Promise with removed count in per sweep rule
  */
-export function sweepByRuleList(rules) {
+export function sweepByRuleList(rules = []) {
+  if (!rules.length) return Promise.resolve(0);
   const promises = [];
   rules.forEach(rule => {
     promises.push(sweepByRule(rule));

@@ -18,7 +18,14 @@ browser.windows.onCreated.addListener(() => {
         ruleids.push(rule.id);
         if (rule.enabled === true) _enabledRules.push(rule);
       });
-      sweepByRuleList(_enabledRules);
+      console.log('start sweeping...');
+      sweepByRuleList(_enabledRules).then(() => {
+        _enabledRules.forEach(rule => {
+          const _task = rule.timingTask;
+          _task.updateExcutedTime();
+          store.saveRule(rule, true);
+        });
+      });
       if (!ruleids.length) {
         clearAllAlarms();
       } else {
